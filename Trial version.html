@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #282c34;
+            font-family: Arial, sans-serif;
+            color: #61dafb;
+        }
+        .container {
+            text-align: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #20232a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+            border: 2px solid #61dafb;
+            transition: background-color 0.3s;
+        }
+        .cell:hover {
+            background-color: #61dafb;
+            color: #20232a;
+        }
+        .cell.X {
+            color: #ff6347; /* Tomato */
+        }
+        .cell.O {
+            color: #4682b4; /* SteelBlue */
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+        .reset {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #61dafb;
+            border: none;
+            color: #20232a;
+            transition: background-color 0.3s;
+        }
+        .reset:hover {
+            background-color: #21a1f1;
+        }
+        .mode-select, .difficulty-select {
+            margin-top: 20px;
+        }
+        select {
+            padding: 5px;
+            font-size: 1em;
+            background-color: #20232a;
+            color: #61dafb;
+            border: 1px solid #61dafb;
+            transition: background-color 0.3s;
+        }
+        select:hover {
+            background-color: #61dafb;
+            color: #20232a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="grid" id="grid">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <div class="message" id="message"></div>
+        <button class="reset" id="reset">Reset Game</button>
+        <div class="mode-select">
+            <label for="mode">Select Mode:</label>
+            <select id="mode">
+                <option value="human">Human vs Human</option>
+                <option value="computer">Human vs Computer</option>
+            </select>
+        </div>
+        <div class="difficulty-select">
+            <label for="difficulty">Select Difficulty:</label>
+            <select id="difficulty">
+                <option value="beginner">Beginner</option>
+                <option value="professional">Professional</option>
+                <option value="legendary">Legendary</option>
+            </select>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const message = document.getElementById('message');
+        const resetButton = document.getElementById('reset');
+        const modeSelect = document.getElementById('mode');
+        const difficultySelect = document.getElementById('difficulty');
+        let currentPlayer = 'X';
+        let board = Array(9).fill(null);
+        let gameActive = true;
+        let gameMode = 'human';
+        let difficulty = 'beginner';
+
+        const winningCombinations = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        function handleCellClick(event) {
+            const index = event.target.getAttribute('data-index');
+            if (board[index] || !gameActive) return;
+
+            board[index] = currentPlayer;
+            event.target.textContent = currentPlayer;
+            event.target.classList.add(currentPlayer);
+
+            if (checkWin()) {
+                message.textContent = `${currentPlayer} wins!`;
+                gameActive = false;
+                return;
+            }
+
+            if (board.every(cell => cell)) {
+                message.textContent = 'Draw!';
+                gameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+
+            if (gameMode === 'computer' && currentPlayer === 'O') {
+                computerMove();
+            }
+        }
+
+        function checkWin() {
+            return winningCombinations.some(combination => {
+                return combination.every(index => board[index] === currentPlayer);
+            });
+        }
+
+        function resetGame() {
+            board.fill(null);
+            currentPlayer = 'X';
+            gameActive = true;
+            message.textContent = '';
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('X', 'O');
+            });
+        }
+
+        function computerMove() {
+            const emptyCells = board.map((cell, index) => cell === null ? index : null).filter(index => index !== null);
+            let moveIndex;
+
+            if (difficulty === 'beginner') {
+                moveIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            } else if (difficulty === 'professional') {
+                moveIndex = findBestMove() || emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            } else if (difficulty === 'legendary') {
+                moveIndex = findBestMove(); 
+            }
+
+            board[moveIndex] = currentPlayer;
+            const cell = document.querySelector(`.cell[data-index="${moveIndex}"]`);
+            cell.textContent = currentPlayer;
+            cell.classList.add(currentPlayer);
+
+            if (checkWin()) {
+                message.textContent = `${currentPlayer} wins!`;
+                gameActive = false;
+                return;
+            }
+
+            if (board.every(cell => cell)) {
+                message.textContent = 'Draw!';
+                gameActive = false;
+                return;
+            }
+
+            currentPlayer = 'X';
+        }
+
+        function findBestMove() {
+            let bestScore = -Infinity;
+            let move;
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === null) {
+                    board[i] = 'O';
+                    let score = minimax(board, 0, false);
+                    board[i] = null;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+            return move;
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            if (checkWin()) {
+                return isMaximizing ? -1 : 1;
+            }
+            if (board.every(cell => cell)) {
+                return 0;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === null) {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = null;
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === null) {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = null;
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        grid.addEventListener('click', handleCellClick);
+        resetButton.addEventListener('click', resetGame);
+        modeSelect.addEventListener('change', (event) => {
+            gameMode = event.target.value;
+            resetGame();
+        });
+        difficultySelect.addEventListener('change', (event) => {
+            difficulty = event.target.value;
+            resetGame();
+        });
+    </script>
+</body>
+</html>
