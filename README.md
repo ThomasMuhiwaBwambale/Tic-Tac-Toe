@@ -28,7 +28,6 @@ JavaScript: Implements the game logic, AI opponent, and interactive features.
 
 ## How to Play
 1. Clone this repository to your local machine:
-    git clone https://github.com/your-username/tic-tac-toe.git cd tic-tac-toe
 
 2. Open the index.html file in your browser to launch the game.
 3. Choose a Mode: Use the dropdown menu to select Human vs. Human or Human vs. Computer.
@@ -60,7 +59,8 @@ Known Issues and Limitations
 Limited Undo:
 
 There is no undo option to reverse moves.
-AI Limitations:
+
+## AI Limitations:
 
 While the AI is challenging, the implementation of Minimax can slow down for large-scale extensions of the game (e.g., larger boards or complex rules).
 Future Improvements
@@ -73,4 +73,4 @@ Add sound to the game.
 License
 This project is licensed under the MIT License. Feel free to use, modify, and distribute it as per the terms of the license.
 
-Happy Gaming! 🎮
+Happy Gaming! 
